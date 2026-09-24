@@ -15,11 +15,7 @@
       --color-borde: #2e3d4e;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -41,11 +37,7 @@
       border-bottom: 1px solid var(--color-borde);
     }
 
-    header h1 {
-      color: var(--acento-naranja);
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
+    header h1 { color: var(--acento-naranja); font-size: 1.2rem; font-weight: bold; }
 
     .btn-api {
       background: transparent;
@@ -118,12 +110,11 @@
       cursor: pointer;
     }
 
-    /* Modal */
     .modal {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.8);
       justify-content: center;
       align-items: center;
       padding: 16px;
@@ -165,8 +156,8 @@
   <div id="api-modal" class="modal">
     <div class="modal-content">
       <h3>Configurar Clave API</h3>
-      <p style="font-size:0.85rem; color: var(--texto-silenciado);">Ingresa tu clave de Google AI Studio:</p>
-      <input type="text" id="api-key-input" placeholder="Pega tu clave aquí...">
+      <p style="font-size:0.85rem; color: var(--texto-silenciado);">Pega tu clave de Google AI Studio:</p>
+      <input type="text" id="api-key-input" placeholder="AQ.Ab8RN...">
       <div class="modal-actions">
         <button class="btn-api" onclick="closeModal()">Cancelar</button>
         <button class="btn-send" style="padding: 8px 16px;" onclick="saveApiKey()">Guardar</button>
@@ -218,29 +209,30 @@
       input.value = '';
 
       const loadingId = appendMessage('CHEF-88 está pensando...', 'bot-message');
+      const loadingElem = document.getElementById(loadingId);
 
       try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: text }] }],
-            systemInstruction: {
-              parts: [{ text: "Eres CHEF-88, un chef experto, sarcástico pero servicial. Ayudas con recetas e ingredientes." }]
-            }
+            contents: [{
+              parts: [{ text: "Eres CHEF-88, un chef experto, un poco sarcástico pero servicial. " + text }]
+            }]
           })
         });
 
         const data = await response.json();
-        const loadingElem = document.getElementById(loadingId);
 
         if (data.candidates && data.candidates[0].content.parts[0].text) {
           loadingElem.innerText = data.candidates[0].content.parts[0].text;
+        } else if (data.error) {
+          loadingElem.innerText = 'Error de Google: ' + data.error.message;
         } else {
-          loadingElem.innerText = 'Error en la respuesta de la API. Verifica tu clave.';
+          loadingElem.innerText = 'Respuesta no válida del servidor. Verifica que la clave API esté bien copiada.';
         }
       } catch (err) {
-        document.getElementById(loadingId).innerText = 'Error de conexión con la API.';
+        loadingElem.innerText = 'Error de conexión: ' + err.message;
       }
     }
 
