@@ -1,3 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHEF-88</title>
+  <style>
+    :root {
+      --bg-oscuro: #0f172a;
+      --panel-bg: #1e293b;
+      --panel-secundario: #334155;
+      --acento-naranja: #ff6b35;
+      --acento-brillo: #ff8c61;
+      --verde-neon: #10b981;
+      --rojo-mic: #ef4444;
+      --texto-ligero: #f8fafc;
+      --texto-silenciado: #94a3b8;
+      --color-borde: #334155;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-oscuro);
+      color: var(--texto-ligero);
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      background-color: rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(10px);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--color-borde);
+      z-index: 10;
+    }
+
+    .app-title { font-size: 1.1rem; font-weight: 800; color: var(--acento-naranja); letter-spacing: 1px; }
+
+    .header-controls { display: flex; gap: 8px; }
+
+    .btn-icon {
+      background: var(--panel-secundario);
+      border: 1px solid var(--color-borde);
+      color: var(--texto-ligero);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon.active { border-color: var(--acento-naranja); color: var(--acento-naranja); }
+
+    .chef-dashboard {
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid var(--color-borde);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .robot-stage {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .robot-glow {
+      position: absolute;
+      width: 75px;
+      height: 75px;
+      border-radius: 50%;
+      background: var(--acento-naranja);
+      opacity: 0.25;
+      filter: blur(15px);
+      transition: all 0.5s ease;
+    }
+
+    .robot-container { width: 85px; height: 85px; z-index: 2; transition: transform 0.3s ease; }
+
+    @keyframes idleFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-5px) rotate(1deg); }
+    }
+    .robot-container.idle { animation: idleFloat 3.5s ease-in-out infinite; }
+
+    @keyframes thinkingBounce {
+      0%, 100% { transform: scale(1) translateY(0); }
+      50% { transform: scale(1.08) translateY(-4px); }
+    }
+    .robot-container.thinking { animation: thinkingBounce 0.6s ease-in-out infinite; }
+
+    @keyframes speakingPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .robot-container.speaking { animation: speakingPulse 0.4s ease-in-out infinite; }
+
+    .antenna-light { fill: var(--acento-naranja); transition: fill 0.3s ease; }
+    .thinking .antenna-light { fill: #f59e0b; animation: blinkFast 0.3s infinite alternate; }
+
+    @keyframes blinkFast { from { opacity: 0.3; } to { opacity: 1; } }
+
+    .eye { fill: var(--verde-neon); transition: all 0.3s ease; }
+    .thinking .eye { fill: #f59e0b; }
+    .speaking .eye { fill: var(--acento-naranja); }
+
+    .chef-status-text {
+      margin-top: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--texto-silenciado);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    #chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .message {
+      max-width: 85%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .bot-message { background-color: var(--panel-bg); align-self: flex-start; border-top-left-radius: 4px; border: 1px solid var(--color-borde); }
+    .user-message { background: linear-gradient(135deg, #ff6b35 0%, #ff8c61 100%); color: #ffffff; align-self: flex-end; border-top-right-radius: 4px; }
+
+    .img-preview {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    #input-container {
+      padding: 10px 12px;
+      background-color: var(--panel-bg);
+      border-top: 1px solid var(--color-borde);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .input-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background-color: var(--bg-oscuro);
+      border: 1px solid var(--color-borde);
+      border-radius: 25px;
+      padding: 2px 8px 2px 16px;
+    }
+
+    .input-wrapper input[type="text"] {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--texto-ligero);
+      padding: 10px 0;
+      font-size: 0.95rem;
+      outline: none;
+      min-width: 0;
+    }
+
+    .btn-inline {
+      background: transparent;
+      border: none;
+      color: var(--texto-silenciado);
+      padding: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: color 0.2s;
+    }
+
+    .btn-inline:hover, .btn-inline:active {
+      color: var(--acento-naranja);
+    }
+
+    .btn-inline.recording {
+      color: var(--rojo-mic);
+      animation: pulseMic 1s infinite;
+    }
+
+    @keyframes pulseMic {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    button.btn-send {
+      background: var(--acento-naranja);
+      color: white;
+      border: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+      flex-shrink: 0;
+    }
+
+    .modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); justify-content: center; align-items: center; padding: 16px; z-index: 100;
+    }
+
+    .modal-content {
+      background: var(--panel-bg); padding: 24px; border-radius: 20px; width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; border: 1px solid var(--color-borde);
+    }
+
+    .modal-content input { width: 100%; border-radius: 10px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="app-title">CHEF-88 AI</div>
+    <div class="header-controls">
+      <button id="btn-audio" class="btn-icon active" onclick="toggleAudio()">🔊 Voz</button>
+      <button class="btn-icon" onclick="openModal()">🔑 API</button>
+    </div>
+  </header>
+
+  <div class="chef-dashboard">
+    <div class="robot-stage">
+      <div id="robot-container" class="robot-container idle">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M35 28C32 20 40 12 50 12C60 12 68 20 65 28C72 28 75 38 68 42H32C25 38 28 28 35 28Z" fill="#FFFFFF"/>
+          <rect x="33" y="38" width="34" height="6" fill="#E2E8F0" rx="1"/>
+          <line x1="50" y1="44" x2="50" y2="48" stroke="#ff6b35" stroke-width="3"/>
+          <circle cx="50" cy="43" r="4" class="antenna-light"/>
+          <rect x="20" y="48" width="60" height="42" rx="14" fill="#334155" stroke="#475569" stroke-width="2"/>
+          <rect x="12" y="60" width="8" height="18" rx="3" fill="#ff6b35"/>
+          <rect x="80" y="60" width="8" height="18" rx="3" fill="#ff6b35"/>
+          <rect x="28" y="56" width="44" height="20" rx="8" fill="#0f172a"/>
+          <circle id="eye-left" class="eye" cx="40" cy="66" r="4"/>
+          <circle id="eye-right" class="eye" cx="60" cy="66" r="4"/>
+          <path id="robot-mouth" d="M42 72 Q50 76 58 72" stroke="#64748B" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="robot-glow"></div>
+    </div>
+    <div id="chef-status" class="chef-status-text">¡Al ataqueer!</div>
+  </div>
+
+  <div id="chat-container">
+    <div class="message bot-message">¡Oído en cocina, pecador! Soy CHEF-88. Puedes hablarme, escribirme o pulsar la cámara para enseñarme tus ingredientes. ¡Fistro!</div>
+  </div>
+
+  <div id="input-container">
+    <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;" onchange="handleImageSelect(event)">
+
+    <div class="input-wrapper">
+      <input type="text" id="user-input" placeholder="Escribe o habla..." onkeypress="handleKey(event)">
+      
+      <button class="btn-inline" onclick="openCamera()" title="Tomar foto">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+      </button>
+
+      <button id="btn-mic" class="btn-inline" onclick="toggleMic()" title="Hablar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+      </button>
+    </div>
+
+    <button class="btn-send" onclick="sendMessage()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
+  </div>
+
+  <div id="api-modal" class="modal">
+    <div class="modal-content">
+      <h3>Configurar Clave API</h3>
+      <p style="font-size:0.85rem; color: var(--texto-silenciado);">Ingresa tu API Key de Google AI Studio:</p>
+      <input type="text" id="api-key-input" placeholder="AQ.Ab8RN...">
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button class="btn-icon" onclick="closeModal()">Cancelar</button>
+        <button class="btn-icon" style="background: var(--acento-naranja);" onclick="saveApiKey()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let apiKey = localStorage.getItem('CHEF88_API_KEY') || '';
+    let audioEnabled = true;
+    let recognition = null;
+    let isRecording = false;
+    let selectedImageBase64 = null;
+
+    window.onload = () => {
+      if (!apiKey) openModal();
+      initSpeechRecognition();
+    };
+
+    function openCamera() {
+      document.getElementById('camera-input').click();
+    }
+
+    function handleImageSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        selectedImageBase64 = e.target.result.split(',')[1];
+        appendImageMessage(e.target.result, 'user-message');
+        if (!document.getElementById('user-input').value.trim()) {
+          document.getElementById('user-input').value = "¿Qué puedo cocinar con esto, fistro?";
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function initSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'es-ES';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.onstart = () => {
+          isRecording = true;
+          document.getElementById('btn-mic').classList.add('recording');
+          setChefState('thinking', 'Escuchando, pecador...');
+        };
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          document.getElementById('user-input').value = transcript;
+          sendMessage();
+        };
+
+        recognition.onerror = () => stopMic();
+        recognition.onend = () => stopMic();
+      }
+    }
+
+    function toggleMic() {
+      if (!recognition) {
+        alert('El reconocimiento de voz no está disponible en este navegador.');
+        return;
+      }
+      if (isRecording) {
+        recognition.stop();
+      } else {
+        recognition.start();
+      }
+    }
+
+    function stopMic() {
+      isRecording = false;
+      document.getElementById('btn-mic').classList.remove('recording');
+      setChefState('idle', '¡Al ataqueer!');
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('btn-audio');
+      if (audioEnabled) {
+        btn.innerText = '🔊 Voz';
+        btn.classList.add('active');
+      } else {
+        btn.innerText = '🔇 Voz';
+        btn.classList.remove('active');
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    function openModal() {
+      document.getElementById('api-key-input').value = apiKey;
+      document.getElementById('api-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('api-modal').style.display = 'none';
+    }
+
+    function saveApiKey() {
+      const key = document.getElementById('api-key-input').value.trim();
+      if (key) {
+        apiKey = key;
+        localStorage.setItem('CHEF88_API_KEY', key);
+        closeModal();
+      }
+    }
+
+    function handleKey(e) { if (e.key === 'Enter') sendMessage(); }
+
+    function setChefState(state, text) {
+      const container = document.getElementById('robot-container');
+      const status = document.getElementById('chef-status');
+      const mouth = document.getElementById('robot-mouth');
+      
+      container.className = `robot-container ${state}`;
+      status.innerText = text;
+
+      if (state === 'thinking') {
+        mouth.setAttribute('d', 'M44 73 L56 73');
+      } else if (state === 'speaking') {
+        mouth.setAttribute('d', 'M42 70 Q50 78 58 70');
+      } else {
+        mouth.setAttribute('d', 'M42 72 Q50 76 58 72');
+      }
+    }
+
+    function speakText(text) {
+      if (!audioEnabled || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+
+      const cleanText = text.replace(/[*_#]/g, '');
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = 'es-ES';
+      utterance.pitch = 1.25;
+      utterance.rate = 1.10;
+
+      utterance.onstart = () => setChefState('speaking', '¡Hablando, pecador!');
+      utterance.onend = () => setChefState('idle', '¡Al ataqueer!');
+      utterance.onerror = () => setChefState('idle', '¡Al ataqueer!');
+
+      window.speechSynthesis.speak(utterance);
+    }
+
     async function sendMessage() {
       const input = document.getElementById('user-input');
       const text = input.value.trim();
@@ -30,8 +498,7 @@
         selectedImageBase64 = null;
       }
 
-      // Lista de modelos ordenados por preferencia
-      const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+      const models = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
       let lastError = '';
       let success = false;
 
@@ -69,3 +536,31 @@
         setChefState('idle', '¡Al ataqueer!');
       }
     }
+
+    function appendMessage(text, className) {
+      const container = document.getElementById('chat-container');
+      const msg = document.createElement('div');
+      msg.className = `message ${className}`;
+      msg.id = 'msg-' + Date.now();
+      msg.innerText = text;
+      container.appendChild(msg);
+      container.scrollTop = container.scrollHeight;
+      return msg.id;
+    }
+
+    function appendImageMessage(imgDataUrl, className) {
+      const container = document.getElementById('chat-container');
+      const msg = document.createElement('div');
+      msg.className = `message ${className}`;
+      
+      const img = document.createElement('img');
+      img.src = imgDataUrl;
+      img.className = 'img-preview';
+      msg.appendChild(img);
+      
+      container.appendChild(msg);
+      container.scrollTop = container.scrollHeight;
+    }
+  </script>
+</body>
+</html>
