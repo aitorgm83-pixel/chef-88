@@ -6,12 +6,15 @@
   <title>CHEF-88</title>
   <style>
     :root {
-      --bg-oscuro: #121a22;
-      --panel-bg: #1c2733;
+      --bg-oscuro: #0f172a;
+      --panel-bg: #1e293b;
+      --panel-secundario: #334155;
       --acento-naranja: #ff6b35;
-      --texto-ligero: #e0e6ed;
-      --texto-silenciado: #8a99ad;
-      --color-borde: #2e3d4e;
+      --acento-brillo: #ff8c61;
+      --verde-neon: #10b981;
+      --texto-ligero: #f8fafc;
+      --texto-silenciado: #94a3b8;
+      --color-borde: #334155;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,120 +30,185 @@
       overflow: hidden;
     }
 
+    /* HEADER SUPERIOR CON CONTROLES */
     header {
-      background-color: var(--panel-bg);
+      background-color: rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(10px);
       padding: 10px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--color-borde);
+      z-index: 10;
     }
 
-    .brand-container {
+    .app-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--acento-naranja);
+      letter-spacing: 1px;
+    }
+
+    .btn-api {
+      background: var(--panel-secundario);
+      border: 1px solid var(--color-borde);
+      color: var(--texto-ligero);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-api:active { transform: scale(0.95); }
+
+    /* TARJETA CENTRAL DE CHEF-88 (EL ROBOT) */
+    .chef-dashboard {
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      padding: 16px;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 12px;
+      justify-content: center;
+      border-bottom: 1px solid var(--color-borde);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
 
-    /* ESTILOS Y ANIMACIONES DEL ROBOT */
-    .robot-avatar {
-      width: 42px;
-      height: 42px;
-      background: #15202b;
-      border-radius: 50%;
+    .robot-stage {
+      position: relative;
+      width: 100px;
+      height: 100px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 2px solid var(--acento-naranja);
-      box-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
-      transition: all 0.3s ease;
     }
 
-    .robot-svg {
-      width: 30px;
-      height: 30px;
+    /* Halo de luz tras el robot */
+    .robot-glow {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--acento-naranja);
+      opacity: 0.25;
+      filter: blur(15px);
+      transition: all 0.5s ease;
     }
 
-    /* Animación flotante suave */
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-3px); }
+    .robot-container {
+      width: 90px;
+      height: 90px;
+      z-index: 2;
+      transition: transform 0.3s ease;
     }
 
-    .robot-avatar.idle {
-      animation: float 3s ease-in-out infinite;
+    /* Animación Flotante */
+    @keyframes idleFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-6px) rotate(1deg); }
     }
 
-    /* Animación cuando está pensando */
-    @keyframes pulse-thinking {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 107, 53, 0.4); }
-      50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(255, 107, 53, 0.8); }
+    .robot-container.idle {
+      animation: idleFloat 3.5s ease-in-out infinite;
     }
 
-    .robot-avatar.thinking {
-      animation: pulse-thinking 1s infinite;
-      border-color: #ff9f1c;
+    /* Animación Pensando / Cocinando */
+    @keyframes thinkingBounce {
+      0%, 100% { transform: scale(1) translateY(0); }
+      50% { transform: scale(1.08) translateY(-4px); }
     }
 
-    .robot-eyes {
-      fill: #2ec4b6;
+    .robot-container.thinking {
+      animation: thinkingBounce 0.6s ease-in-out infinite;
+    }
+
+    .robot-container.thinking + .robot-glow {
+      opacity: 0.6;
+      filter: blur(25px);
+      background: #f59e0b;
+    }
+
+    /* Estado de la antena */
+    .antenna-light {
+      fill: var(--acento-naranja);
       transition: fill 0.3s ease;
     }
 
-    .thinking .robot-eyes {
-      fill: var(--acento-naranja);
+    .thinking .antenna-light {
+      fill: #f59e0b;
+      animation: blinkFast 0.3s infinite alternate;
     }
 
-    header h1 { color: var(--acento-naranja); font-size: 1.2rem; font-weight: bold; }
+    @keyframes blinkFast {
+      from { opacity: 0.3; }
+      to { opacity: 1; }
+    }
 
-    .btn-api {
-      background: transparent;
-      border: 1px solid var(--color-borde);
+    /* Ojos del Robot */
+    .eye {
+      fill: var(--verde-neon);
+      transition: all 0.3s ease;
+    }
+
+    .thinking .eye {
+      fill: #f59e0b;
+    }
+
+    /* Boca / Ondas de estado */
+    .chef-status-text {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
       color: var(--texto-silenciado);
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
     }
 
+    /* CHAT Y MENSAJES */
     #chat-container {
       flex: 1;
       overflow-y: auto;
       padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
 
     .message {
       max-width: 85%;
       padding: 12px 16px;
-      border-radius: 12px;
+      border-radius: 16px;
       font-size: 0.95rem;
-      line-height: 1.4;
+      line-height: 1.5;
       white-space: pre-wrap;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
 
     .bot-message {
       background-color: var(--panel-bg);
       align-self: flex-start;
-      border-bottom-left-radius: 2px;
+      border-top-left-radius: 4px;
       border: 1px solid var(--color-borde);
+      color: var(--texto-ligero);
     }
 
     .user-message {
-      background-color: var(--acento-naranja);
-      color: #fff;
+      background: linear-gradient(135deg, #ff6b35 0%, #ff8c61 100%);
+      color: #ffffff;
       align-self: flex-end;
-      border-bottom-right-radius: 2px;
+      border-top-right-radius: 4px;
+      font-weight: 500;
     }
 
+    /* BARRA DE ENTRADA */
     #input-container {
       padding: 12px 16px;
       background-color: var(--panel-bg);
       border-top: 1px solid var(--color-borde);
       display: flex;
-      gap: 8px;
+      gap: 10px;
+      align-items: center;
     }
 
     input[type="text"] {
@@ -148,27 +216,41 @@
       background-color: var(--bg-oscuro);
       border: 1px solid var(--color-borde);
       color: var(--texto-ligero);
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 1rem;
+      padding: 14px 16px;
+      border-radius: 25px;
+      font-size: 0.95rem;
       outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--acento-naranja);
     }
 
     button.btn-send {
-      background-color: var(--acento-naranja);
+      background: var(--acento-naranja);
       color: white;
       border: none;
-      padding: 0 16px;
-      border-radius: 8px;
-      font-weight: bold;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+      transition: transform 0.2s;
     }
 
+    button.btn-send:active { transform: scale(0.9); }
+
+    /* MODAL CLAVE API */
     .modal {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(5px);
       justify-content: center;
       align-items: center;
       padding: 16px;
@@ -177,64 +259,89 @@
 
     .modal-content {
       background: var(--panel-bg);
-      padding: 20px;
-      border-radius: 12px;
+      padding: 24px;
+      border-radius: 20px;
       width: 100%;
       max-width: 400px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
+      border: 1px solid var(--color-borde);
     }
 
-    .modal-content h3 { color: var(--acento-naranja); }
-    .modal-content input { width: 100%; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+    .modal-content h3 { color: var(--acento-naranja); font-size: 1.2rem; }
+    .modal-content input { width: 100%; border-radius: 10px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="brand-container">
-      <div id="robot-avatar" class="robot-avatar idle">
-        <!-- SVG del Robot CHEF-88 -->
-        <svg class="robot-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Antena -->
-          <line x1="32" y1="12" x2="32" y2="20" stroke="#ff6b35" stroke-width="3" stroke-linecap="round"/>
-          <circle cx="32" cy="10" r="4" fill="#ff6b35"/>
-          <!-- Cabeza -->
-          <rect x="14" y="20" width="36" height="28" rx="8" fill="#2e3d4e" stroke="#e0e6ed" stroke-width="2"/>
-          <!-- Orejas -->
-          <rect x="8" y="28" width="6" height="12" rx="2" fill="#ff6b35"/>
-          <rect x="50" y="28" width="6" height="12" rx="2" fill="#ff6b35"/>
-          <!-- Ojos -->
-          <circle class="robot-eyes" cx="25" cy="32" r="4"/>
-          <circle class="robot-eyes" cx="39" cy="32" r="4"/>
-          <!-- Boca / Pantalla -->
-          <rect x="22" y="40" width="20" height="3" rx="1.5" fill="#e0e6ed"/>
-        </svg>
-      </div>
-      <h1>CHEF-88</h1>
-    </div>
-    <button class="btn-api" onclick="openModal()">Clave API</button>
+    <div class="app-title">CHEF-88 AI</div>
+    <button class="btn-api" onclick="openModal()">🔑 Clave API</button>
   </header>
 
+  <!-- PANEL CENTRAL DEL ROBOT CHEF -->
+  <div class="chef-dashboard">
+    <div class="robot-stage">
+      <div id="robot-container" class="robot-container idle">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Gorro de Chef -->
+          <path d="M35 28C32 20 40 12 50 12C60 12 68 20 65 28C72 28 75 38 68 42H32C25 38 28 28 35 28Z" fill="#FFFFFF"/>
+          <rect x="33" y="38" width="34" height="6" fill="#E2E8F0" rx="1"/>
+          
+          <!-- Antena -->
+          <line x1="50" y1="44" x2="50" y2="48" stroke="#ff6b35" stroke-width="3"/>
+          <circle cx="50" cy="43" r="4" class="antenna-light"/>
+
+          <!-- Cabeza Principal -->
+          <rect x="20" y="48" width="60" height="42" rx="14" fill="#334155" stroke="#475569" stroke-width="2"/>
+          
+          <!-- Orejas -->
+          <rect x="12" y="60" width="8" height="18" rx="3" fill="#ff6b35"/>
+          <rect x="80" y="60" width="8" height="18" rx="3" fill="#ff6b35"/>
+
+          <!-- Visor / Pantalla Facial -->
+          <rect x="28" y="56" width="44" height="20" rx="8" fill="#0f172a"/>
+
+          <!-- Ojos Digitales -->
+          <circle id="eye-left" class="eye" cx="40" cy="66" r="4"/>
+          <circle id="eye-right" class="eye" cx="60" cy="66" r="4"/>
+
+          <!-- Sonrisa / Boca -->
+          <path id="robot-mouth" d="M42 72 Q50 76 58 72" stroke="#64748B" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="robot-glow"></div>
+    </div>
+    <div id="chef-status" class="chef-status-text">Listo para cocinar</div>
+  </div>
+
+  <!-- CONTENEDOR DEL CHAT -->
   <div id="chat-container">
-    <div class="message bot-message">Soy CHEF-88, tu asistente culinario. Dime qué quieres cocinar o qué ingredientes tienes. Si te falta algo de calidad gourmet, te prepararé la lista para pedírtelo a casa.</div>
+    <div class="message bot-message">¡Oído en cocina! Soy CHEF-88. Dime qué ingredientes tienes a mano o qué se te antoja comer hoy y te preparo la receta ideal.</div>
   </div>
 
+  <!-- ENTRADA DE TEXTO -->
   <div id="input-container">
-    <input type="text" id="user-input" placeholder="Escribe un mensaje..." onkeypress="handleKey(event)">
-    <button class="btn-send" onclick="sendMessage()">Enviar</button>
+    <input type="text" id="user-input" placeholder="Ej: Tengo huevos, patatas y cebolla..." onkeypress="handleKey(event)">
+    <button class="btn-send" onclick="sendMessage()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
   </div>
 
+  <!-- MODAL CONFIGURACIÓN -->
   <div id="api-modal" class="modal">
     <div class="modal-content">
       <h3>Configurar Clave API</h3>
       <p style="font-size:0.85rem; color: var(--texto-silenciado);">Ingresa tu API Key de Google AI Studio:</p>
-      <input type="text" id="api-key-input" placeholder="Pega tu clave aquí...">
+      <input type="text" id="api-key-input" placeholder="AQ.Ab8RN...">
       <div class="modal-actions">
         <button class="btn-api" onclick="closeModal()">Cancelar</button>
-        <button class="btn-send" style="padding: 8px 16px;" onclick="saveApiKey()">Guardar</button>
+        <button class="btn-api" style="background: var(--acento-naranja);" onclick="saveApiKey()">Guardar</button>
       </div>
     </div>
   </div>
@@ -268,9 +375,19 @@
       if (e.key === 'Enter') sendMessage();
     }
 
-    function setRobotState(state) {
-      const avatar = document.getElementById('robot-avatar');
-      avatar.className = `robot-avatar ${state}`;
+    function setChefState(state, text) {
+      const container = document.getElementById('robot-container');
+      const status = document.getElementById('chef-status');
+      const mouth = document.getElementById('robot-mouth');
+      
+      container.className = `robot-container ${state}`;
+      status.innerText = text;
+
+      if (state === 'thinking') {
+        mouth.setAttribute('d', 'M44 73 L56 73'); // Boca neutra/procesando
+      } else {
+        mouth.setAttribute('d', 'M42 72 Q50 76 58 72'); // Sonrisa alegre
+      }
     }
 
     async function sendMessage() {
@@ -279,7 +396,6 @@
       if (!text) return;
 
       if (!apiKey) {
-        alert('Por favor, ingresa tu Clave API primero.');
         openModal();
         return;
       }
@@ -287,7 +403,7 @@
       appendMessage(text, 'user-message');
       input.value = '';
 
-      setRobotState('thinking'); // Activa la animación de "pensando"
+      setChefState('thinking', 'Cocinando respuesta...');
       const loadingId = appendMessage('CHEF-88 está pensando...', 'bot-message');
       const loadingElem = document.getElementById(loadingId);
 
@@ -300,7 +416,7 @@
           },
           body: JSON.stringify({
             contents: [{
-              parts: [{ text: "Eres CHEF-88, un chef experto, sarcástico pero muy servicial. " + text }]
+              parts: [{ text: "Eres CHEF-88, un chef experto con toque sarcástico pero muy servicial. " + text }]
             }]
           })
         });
@@ -310,13 +426,13 @@
         if (response.ok && data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
           loadingElem.innerText = data.candidates[0].content.parts[0].text;
         } else {
-          const detail = data.error?.message || response.statusText || 'Error desconocido';
-          loadingElem.innerText = `[Error ${response.status}]: ${detail}`;
+          const detail = data.error?.message || response.statusText || 'Error de conexión';
+          loadingElem.innerText = `[Error]: ${detail}`;
         }
       } catch (err) {
         loadingElem.innerText = 'Error de red o conexión: ' + err.message;
       } finally {
-        setRobotState('idle'); // Vuelve al estado flotante normal
+        setChefState('idle', 'Listo para cocinar');
       }
     }
 
