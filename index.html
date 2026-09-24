@@ -156,13 +156,21 @@
     .bot-message { background-color: var(--panel-bg); align-self: flex-start; border-top-left-radius: 4px; border: 1px solid var(--color-borde); }
     .user-message { background: linear-gradient(135deg, #ff6b35 0%, #ff8c61 100%); color: #ffffff; align-self: flex-end; border-top-right-radius: 4px; }
 
+    .img-preview {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
     /* CONTROLES DE ENTRADA */
     #input-container {
       padding: 12px 16px;
       background-color: var(--panel-bg);
       border-top: 1px solid var(--color-borde);
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
     }
 
@@ -181,14 +189,15 @@
       background: var(--panel-secundario);
       color: white;
       border: 1px solid var(--color-borde);
-      width: 46px;
-      height: 46px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: all 0.2s;
+      flex-shrink: 0;
     }
 
     .btn-action.recording {
@@ -206,14 +215,15 @@
       background: var(--acento-naranja);
       color: white;
       border: none;
-      width: 46px;
-      height: 46px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+      flex-shrink: 0;
     }
 
     .modal {
@@ -261,11 +271,22 @@
   </div>
 
   <div id="chat-container">
-    <div class="message bot-message">¡Oído en cocina, pecador! Soy CHEF-88. Puedes escribirme o pulsar el micrófono para hablarme directamente. ¡Fistro!</div>
+    <div class="message bot-message">¡Oído en cocina, pecador! Soy CHEF-88. Puedes hablarme, escribirme o pulsar el botón de la cámara para enseñarme tus ingredientes. ¡Fistro!</div>
   </div>
 
   <div id="input-container">
-    <!-- Botón de Micrófono para Hablar -->
+    <!-- Entrada oculta para la cámara/galería -->
+    <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;" onchange="handleImageSelect(event)">
+    
+    <!-- Botón de Cámara -->
+    <button class="btn-action" onclick="openCamera()" title="Tomar o subir foto">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+        <circle cx="12" cy="13" r="4"></circle>
+      </svg>
+    </button>
+
+    <!-- Botón de Micrófono -->
     <button id="btn-mic" class="btn-action" onclick="toggleMic()" title="Hablar">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
@@ -274,7 +295,9 @@
         <line x1="8" y1="23" x2="16" y2="23"></line>
       </svg>
     </button>
+
     <input type="text" id="user-input" placeholder="Escribe o pulsa el micro..." onkeypress="handleKey(event)">
+
     <button class="btn-send" onclick="sendMessage()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -300,11 +323,32 @@
     let audioEnabled = true;
     let recognition = null;
     let isRecording = false;
+    let selectedImageBase64 = null;
 
     window.onload = () => {
       if (!apiKey) openModal();
       initSpeechRecognition();
     };
+
+    /* ABRIR CÁMARA O GALERÍA */
+    function openCamera() {
+      document.getElementById('camera-input').click();
+    }
+
+    function handleImageSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        selectedImageBase64 = e.target.result.split(',')[1];
+        appendImageMessage(e.target.result, 'user-message');
+        if (!document.getElementById('user-input').value.trim()) {
+          document.getElementById('user-input').value = "¿Qué puedo cocinar con estos ingredientes, fistro?";
+        }
+      };
+      reader.readAsDataURL(file);
+    }
 
     /* INICIALIZAR RECONOCIMIENTO DE VOZ */
     function initSpeechRecognition() {
@@ -327,22 +371,14 @@
           sendMessage();
         };
 
-        recognition.onerror = (event) => {
-          stopMic();
-          console.error('Error de voz:', event.error);
-        };
-
-        recognition.onend = () => {
-          stopMic();
-        };
-      } else {
-        console.warn('Reconocimiento de voz no soportado en este navegador.');
+        recognition.onerror = () => stopMic();
+        recognition.onend = () => stopMic();
       }
     }
 
     function toggleMic() {
       if (!recognition) {
-        alert('El reconocimiento de voz no está soportado en este navegador. Prueba en Chrome o Edge.');
+        alert('El reconocimiento de voz no está disponible en este navegador.');
         return;
       }
       if (isRecording) {
@@ -415,8 +451,10 @@
       const cleanText = text.replace(/[*_#]/g, '');
       const utterance = new SpeechSynthesisUtterance(cleanText);
       utterance.lang = 'es-ES';
-      utterance.pitch = 1.35;
-      utterance.rate = 1.15;
+      
+      // Ajuste de tono y velocidad
+      utterance.pitch = 1.25;
+      utterance.rate = 1.10;
 
       utterance.onstart = () => setChefState('speaking', '¡Hablando, pecador!');
       utterance.onend = () => setChefState('idle', '¡Al ataqueer!');
@@ -428,23 +466,37 @@
     async function sendMessage() {
       const input = document.getElementById('user-input');
       const text = input.value.trim();
-      if (!text) return;
+      if (!text && !selectedImageBase64) return;
 
       if (!apiKey) {
         openModal();
         return;
       }
 
-      appendMessage(text, 'user-message');
+      if (text) appendMessage(text, 'user-message');
+      
       input.value = '';
 
-      setChefState('thinking', 'Cocinando respuesta...');
-      const loadingId = appendMessage('CHEF-88 está pensando...', 'bot-message');
+      setChefState('thinking', 'Escaneando ingredientes...');
+      const loadingId = appendMessage('CHEF-88 está analizando...', 'bot-message');
       const loadingElem = document.getElementById(loadingId);
 
-      const promptSystem = "Eres CHEF-88, un chef robot experto y cómico que habla exactamente con el estilo, ritmo y muletillas de Chiquito de la Calzada. Usa expresiones como '¡Fistro!', '¡Pekador de la pradera!', '¡Jarl!', '¡Siete caballos vienen de Bonanza!', '¡No te digo trigo por no llamarte Rodrigo!'. Da respuestas culinarias útiles y recetas breves pero cargadas de su humor. ";
+      const promptSystem = "Eres CHEF-88, un chef robot cómico que habla exactamente como Chiquito de la Calzada. Usa expresiones como '¡Fistro!', '¡Pekador de la pradera!', '¡Jarl!', '¡Siete caballos vienen de Bonanza!'. Analiza minuciosamente los alimentos de las imágenes o del texto y da una receta genial y graciosa. ";
 
-      const models = ['gemini-3.6-flash', 'gemini-1.5-flash', 'gemini-2.0-flash'];
+      const contentsParts = [];
+      contentsParts.push({ text: promptSystem + (text || "¿Qué ves en la imagen?") });
+
+      if (selectedImageBase64) {
+        contentsParts.push({
+          inline_data: {
+            mime_type: "image/jpeg",
+            data: selectedImageBase64
+          }
+        });
+        selectedImageBase64 = null; // Reiniciar imagen
+      }
+
+      const models = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash'];
       let lastError = '';
       let success = false;
 
@@ -457,7 +509,7 @@
               'x-goog-api-key': apiKey
             },
             body: JSON.stringify({
-              contents: [{ parts: [{ text: promptSystem + text }] }]
+              contents: [{ parts: contentsParts }]
             })
           });
 
@@ -478,7 +530,7 @@
       }
 
       if (!success) {
-        loadingElem.innerText = `[Error]: Servidores ocupados. (${lastError})`;
+        loadingElem.innerText = `[Error]: No se pudo analizar. (${lastError})`;
         setChefState('idle', '¡Al ataqueer!');
       }
     }
@@ -492,6 +544,20 @@
       container.appendChild(msg);
       container.scrollTop = container.scrollHeight;
       return msg.id;
+    }
+
+    function appendImageMessage(imgDataUrl, className) {
+      const container = document.getElementById('chat-container');
+      const msg = document.createElement('div');
+      msg.className = `message ${className}`;
+      
+      const img = document.createElement('img');
+      img.src = imgDataUrl;
+      img.className = 'img-preview';
+      msg.appendChild(img);
+      
+      container.appendChild(msg);
+      container.scrollTop = container.scrollHeight;
     }
   </script>
 </body>
