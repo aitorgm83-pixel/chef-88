@@ -12,6 +12,7 @@
       --acento-naranja: #ff6b35;
       --acento-brillo: #ff8c61;
       --verde-neon: #10b981;
+      --rojo-mic: #ef4444;
       --texto-ligero: #f8fafc;
       --texto-silenciado: #94a3b8;
       --color-borde: #334155;
@@ -30,7 +31,6 @@
       overflow: hidden;
     }
 
-    /* HEADER SUPERIOR */
     header {
       background-color: rgba(30, 41, 59, 0.8);
       backdrop-filter: blur(10px);
@@ -42,17 +42,9 @@
       z-index: 10;
     }
 
-    .app-title {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: var(--acento-naranja);
-      letter-spacing: 1px;
-    }
+    .app-title { font-size: 1.1rem; font-weight: 800; color: var(--acento-naranja); letter-spacing: 1px; }
 
-    .header-controls {
-      display: flex;
-      gap: 8px;
-    }
+    .header-controls { display: flex; gap: 8px; }
 
     .btn-icon {
       background: var(--panel-secundario);
@@ -69,10 +61,9 @@
       transition: all 0.2s;
     }
 
-    .btn-icon:active { transform: scale(0.95); }
     .btn-icon.active { border-color: var(--acento-naranja); color: var(--acento-naranja); }
 
-    /* TARJETA CENTRAL DEL ROBOT CHEF */
+    /* TARJETA ROBOT */
     .chef-dashboard {
       background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
       padding: 16px;
@@ -104,66 +95,32 @@
       transition: all 0.5s ease;
     }
 
-    .robot-container {
-      width: 90px;
-      height: 90px;
-      z-index: 2;
-      transition: transform 0.3s ease;
-    }
+    .robot-container { width: 90px; height: 90px; z-index: 2; transition: transform 0.3s ease; }
 
     @keyframes idleFloat {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
       50% { transform: translateY(-6px) rotate(1deg); }
     }
-
-    .robot-container.idle {
-      animation: idleFloat 3.5s ease-in-out infinite;
-    }
+    .robot-container.idle { animation: idleFloat 3.5s ease-in-out infinite; }
 
     @keyframes thinkingBounce {
       0%, 100% { transform: scale(1) translateY(0); }
       50% { transform: scale(1.08) translateY(-4px); }
     }
-
-    .robot-container.thinking {
-      animation: thinkingBounce 0.6s ease-in-out infinite;
-    }
-
-    .robot-container.thinking + .robot-glow {
-      opacity: 0.6;
-      filter: blur(25px);
-      background: #f59e0b;
-    }
+    .robot-container.thinking { animation: thinkingBounce 0.6s ease-in-out infinite; }
 
     @keyframes speakingPulse {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.05); }
     }
+    .robot-container.speaking { animation: speakingPulse 0.4s ease-in-out infinite; }
 
-    .robot-container.speaking {
-      animation: speakingPulse 0.4s ease-in-out infinite;
-    }
+    .antenna-light { fill: var(--acento-naranja); transition: fill 0.3s ease; }
+    .thinking .antenna-light { fill: #f59e0b; animation: blinkFast 0.3s infinite alternate; }
 
-    .antenna-light {
-      fill: var(--acento-naranja);
-      transition: fill 0.3s ease;
-    }
+    @keyframes blinkFast { from { opacity: 0.3; } to { opacity: 1; } }
 
-    .thinking .antenna-light {
-      fill: #f59e0b;
-      animation: blinkFast 0.3s infinite alternate;
-    }
-
-    @keyframes blinkFast {
-      from { opacity: 0.3; }
-      to { opacity: 1; }
-    }
-
-    .eye {
-      fill: var(--verde-neon);
-      transition: all 0.3s ease;
-    }
-
+    .eye { fill: var(--verde-neon); transition: all 0.3s ease; }
     .thinking .eye { fill: #f59e0b; }
     .speaking .eye { fill: var(--acento-naranja); }
 
@@ -176,7 +133,7 @@
       letter-spacing: 1.5px;
     }
 
-    /* CHAT Y MENSAJES */
+    /* CHAT */
     #chat-container {
       flex: 1;
       overflow-y: auto;
@@ -196,23 +153,10 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
 
-    .bot-message {
-      background-color: var(--panel-bg);
-      align-self: flex-start;
-      border-top-left-radius: 4px;
-      border: 1px solid var(--color-borde);
-      color: var(--texto-ligero);
-    }
+    .bot-message { background-color: var(--panel-bg); align-self: flex-start; border-top-left-radius: 4px; border: 1px solid var(--color-borde); }
+    .user-message { background: linear-gradient(135deg, #ff6b35 0%, #ff8c61 100%); color: #ffffff; align-self: flex-end; border-top-right-radius: 4px; }
 
-    .user-message {
-      background: linear-gradient(135deg, #ff6b35 0%, #ff8c61 100%);
-      color: #ffffff;
-      align-self: flex-end;
-      border-top-right-radius: 4px;
-      font-weight: 500;
-    }
-
-    /* BARRA DE ENTRADA */
+    /* CONTROLES DE ENTRADA */
     #input-container {
       padding: 12px 16px;
       background-color: var(--panel-bg);
@@ -231,11 +175,31 @@
       border-radius: 25px;
       font-size: 0.95rem;
       outline: none;
-      transition: border-color 0.2s;
     }
 
-    input[type="text"]:focus {
-      border-color: var(--acento-naranja);
+    .btn-action {
+      background: var(--panel-secundario);
+      color: white;
+      border: 1px solid var(--color-borde);
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-action.recording {
+      background: var(--rojo-mic);
+      border-color: var(--rojo-mic);
+      animation: pulseMic 1s infinite;
+    }
+
+    @keyframes pulseMic {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(239, 68, 68, 0.4); }
+      50% { transform: scale(1.1); box-shadow: 0 0 15px rgba(239, 68, 68, 0.8); }
     }
 
     button.btn-send {
@@ -250,39 +214,18 @@
       justify-content: center;
       cursor: pointer;
       box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
-      transition: transform 0.2s;
     }
 
-    button.btn-send:active { transform: scale(0.9); }
-
-    /* MODAL CLAVE API */
     .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(5px);
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
-      z-index: 100;
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); justify-content: center; align-items: center; padding: 16px; z-index: 100;
     }
 
     .modal-content {
-      background: var(--panel-bg);
-      padding: 24px;
-      border-radius: 20px;
-      width: 100%;
-      max-width: 400px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      border: 1px solid var(--color-borde);
+      background: var(--panel-bg); padding: 24px; border-radius: 20px; width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; border: 1px solid var(--color-borde);
     }
 
-    .modal-content h3 { color: var(--acento-naranja); font-size: 1.2rem; }
     .modal-content input { width: 100%; border-radius: 10px; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
   </style>
 </head>
 <body>
@@ -295,34 +238,20 @@
     </div>
   </header>
 
-  <!-- PANEL CENTRAL DEL ROBOT CHEF -->
   <div class="chef-dashboard">
     <div class="robot-stage">
       <div id="robot-container" class="robot-container idle">
         <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Gorro de Chef -->
           <path d="M35 28C32 20 40 12 50 12C60 12 68 20 65 28C72 28 75 38 68 42H32C25 38 28 28 35 28Z" fill="#FFFFFF"/>
           <rect x="33" y="38" width="34" height="6" fill="#E2E8F0" rx="1"/>
-          
-          <!-- Antena -->
           <line x1="50" y1="44" x2="50" y2="48" stroke="#ff6b35" stroke-width="3"/>
           <circle cx="50" cy="43" r="4" class="antenna-light"/>
-
-          <!-- Cabeza Principal -->
           <rect x="20" y="48" width="60" height="42" rx="14" fill="#334155" stroke="#475569" stroke-width="2"/>
-          
-          <!-- Orejas -->
           <rect x="12" y="60" width="8" height="18" rx="3" fill="#ff6b35"/>
           <rect x="80" y="60" width="8" height="18" rx="3" fill="#ff6b35"/>
-
-          <!-- Visor / Pantalla Facial -->
           <rect x="28" y="56" width="44" height="20" rx="8" fill="#0f172a"/>
-
-          <!-- Ojos Digitales -->
           <circle id="eye-left" class="eye" cx="40" cy="66" r="4"/>
           <circle id="eye-right" class="eye" cx="60" cy="66" r="4"/>
-
-          <!-- Sonrisa / Boca -->
           <path id="robot-mouth" d="M42 72 Q50 76 58 72" stroke="#64748B" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </div>
@@ -331,14 +260,21 @@
     <div id="chef-status" class="chef-status-text">¡Al ataqueer!</div>
   </div>
 
-  <!-- CONTENEDOR DEL CHAT -->
   <div id="chat-container">
-    <div class="message bot-message">¡Oído en cocina, pecador! Soy CHEF-88. Dime qué tienes en la nevera y te preparo un plato de categoría. ¡Fistro!</div>
+    <div class="message bot-message">¡Oído en cocina, pecador! Soy CHEF-88. Puedes escribirme o pulsar el micrófono para hablarme directamente. ¡Fistro!</div>
   </div>
 
-  <!-- ENTRADA DE TEXTO -->
   <div id="input-container">
-    <input type="text" id="user-input" placeholder="Ej: Tengo patatas y huevos..." onkeypress="handleKey(event)">
+    <!-- Botón de Micrófono para Hablar -->
+    <button id="btn-mic" class="btn-action" onclick="toggleMic()" title="Hablar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+        <line x1="12" y1="19" x2="12" y2="23"></line>
+        <line x1="8" y1="23" x2="16" y2="23"></line>
+      </svg>
+    </button>
+    <input type="text" id="user-input" placeholder="Escribe o pulsa el micro..." onkeypress="handleKey(event)">
     <button class="btn-send" onclick="sendMessage()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -347,13 +283,12 @@
     </button>
   </div>
 
-  <!-- MODAL CONFIGURACIÓN -->
   <div id="api-modal" class="modal">
     <div class="modal-content">
       <h3>Configurar Clave API</h3>
       <p style="font-size:0.85rem; color: var(--texto-silenciado);">Ingresa tu API Key de Google AI Studio:</p>
       <input type="text" id="api-key-input" placeholder="AQ.Ab8RN...">
-      <div class="modal-actions">
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
         <button class="btn-icon" onclick="closeModal()">Cancelar</button>
         <button class="btn-icon" style="background: var(--acento-naranja);" onclick="saveApiKey()">Guardar</button>
       </div>
@@ -363,10 +298,65 @@
   <script>
     let apiKey = localStorage.getItem('CHEF88_API_KEY') || '';
     let audioEnabled = true;
+    let recognition = null;
+    let isRecording = false;
 
     window.onload = () => {
       if (!apiKey) openModal();
+      initSpeechRecognition();
     };
+
+    /* INICIALIZAR RECONOCIMIENTO DE VOZ */
+    function initSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'es-ES';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.onstart = () => {
+          isRecording = true;
+          document.getElementById('btn-mic').classList.add('recording');
+          setChefState('thinking', 'Escuchando, pecador...');
+        };
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          document.getElementById('user-input').value = transcript;
+          sendMessage();
+        };
+
+        recognition.onerror = (event) => {
+          stopMic();
+          console.error('Error de voz:', event.error);
+        };
+
+        recognition.onend = () => {
+          stopMic();
+        };
+      } else {
+        console.warn('Reconocimiento de voz no soportado en este navegador.');
+      }
+    }
+
+    function toggleMic() {
+      if (!recognition) {
+        alert('El reconocimiento de voz no está soportado en este navegador. Prueba en Chrome o Edge.');
+        return;
+      }
+      if (isRecording) {
+        recognition.stop();
+      } else {
+        recognition.start();
+      }
+    }
+
+    function stopMic() {
+      isRecording = false;
+      document.getElementById('btn-mic').classList.remove('recording');
+      setChefState('idle', '¡Al ataqueer!');
+    }
 
     function toggleAudio() {
       audioEnabled = !audioEnabled;
@@ -399,9 +389,7 @@
       }
     }
 
-    function handleKey(e) {
-      if (e.key === 'Enter') sendMessage();
-    }
+    function handleKey(e) { if (e.key === 'Enter') sendMessage(); }
 
     function setChefState(state, text) {
       const container = document.getElementById('robot-container');
@@ -422,26 +410,17 @@
 
     function speakText(text) {
       if (!audioEnabled || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
 
-      window.speechSynthesis.cancel(); // Cancelar cualquier audio anterior
-
-      const cleanText = text.replace(/[*_#]/g, ''); // Limpiar caracteres de formato
+      const cleanText = text.replace(/[*_#]/g, '');
       const utterance = new SpeechSynthesisUtterance(cleanText);
       utterance.lang = 'es-ES';
-      utterance.pitch = 1.35; // Tono más agudo para emular estilo Chiquito
-      utterance.rate = 1.15;  // Velocidad más rápida y atropellada
+      utterance.pitch = 1.35;
+      utterance.rate = 1.15;
 
-      utterance.onstart = () => {
-        setChefState('speaking', '¡Hablando, pecador!');
-      };
-
-      utterance.onend = () => {
-        setChefState('idle', '¡Al ataqueer!');
-      };
-
-      utterance.onerror = () => {
-        setChefState('idle', '¡Al ataqueer!');
-      };
+      utterance.onstart = () => setChefState('speaking', '¡Hablando, pecador!');
+      utterance.onend = () => setChefState('idle', '¡Al ataqueer!');
+      utterance.onerror = () => setChefState('idle', '¡Al ataqueer!');
 
       window.speechSynthesis.speak(utterance);
     }
@@ -478,9 +457,7 @@
               'x-goog-api-key': apiKey
             },
             body: JSON.stringify({
-              contents: [{
-                parts: [{ text: promptSystem + text }]
-              }]
+              contents: [{ parts: [{ text: promptSystem + text }] }]
             })
           });
 
@@ -489,7 +466,7 @@
           if (response.ok && data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
             const answer = data.candidates[0].content.parts[0].text;
             loadingElem.innerText = answer;
-            speakText(answer); // Leer respuesta con voz
+            speakText(answer);
             success = true;
             break;
           } else {
