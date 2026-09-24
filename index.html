@@ -66,7 +66,7 @@
     /* TARJETA ROBOT */
     .chef-dashboard {
       background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-      padding: 16px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -77,8 +77,8 @@
 
     .robot-stage {
       position: relative;
-      width: 100px;
-      height: 100px;
+      width: 90px;
+      height: 90px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -86,8 +86,8 @@
 
     .robot-glow {
       position: absolute;
-      width: 80px;
-      height: 80px;
+      width: 75px;
+      height: 75px;
       border-radius: 50%;
       background: var(--acento-naranja);
       opacity: 0.25;
@@ -95,11 +95,11 @@
       transition: all 0.5s ease;
     }
 
-    .robot-container { width: 90px; height: 90px; z-index: 2; transition: transform 0.3s ease; }
+    .robot-container { width: 85px; height: 85px; z-index: 2; transition: transform 0.3s ease; }
 
     @keyframes idleFloat {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-6px) rotate(1deg); }
+      50% { transform: translateY(-5px) rotate(1deg); }
     }
     .robot-container.idle { animation: idleFloat 3.5s ease-in-out infinite; }
 
@@ -125,7 +125,7 @@
     .speaking .eye { fill: var(--acento-naranja); }
 
     .chef-status-text {
-      margin-top: 8px;
+      margin-top: 6px;
       font-size: 0.8rem;
       font-weight: 600;
       color: var(--texto-silenciado);
@@ -164,9 +164,9 @@
       display: block;
     }
 
-    /* CONTROLES DE ENTRADA */
+    /* CONTROLES DE ENTRADA OPTIMIZADOS */
     #input-container {
-      padding: 12px 16px;
+      padding: 10px 12px;
       background-color: var(--panel-bg);
       border-top: 1px solid var(--color-borde);
       display: flex;
@@ -174,41 +174,52 @@
       align-items: center;
     }
 
-    input[type="text"] {
+    .input-wrapper {
       flex: 1;
+      display: flex;
+      align-items: center;
       background-color: var(--bg-oscuro);
       border: 1px solid var(--color-borde);
-      color: var(--texto-ligero);
-      padding: 14px 16px;
       border-radius: 25px;
-      font-size: 0.95rem;
-      outline: none;
+      padding: 2px 8px 2px 16px;
     }
 
-    .btn-action {
-      background: var(--panel-secundario);
-      color: white;
-      border: 1px solid var(--color-borde);
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
+    .input-wrapper input[type="text"] {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--texto-ligero);
+      padding: 10px 0;
+      font-size: 0.95rem;
+      outline: none;
+      min-width: 0;
+    }
+
+    .btn-inline {
+      background: transparent;
+      border: none;
+      color: var(--texto-silenciado);
+      padding: 8px;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      flex-shrink: 0;
+      border-radius: 50%;
+      transition: color 0.2s;
     }
 
-    .btn-action.recording {
-      background: var(--rojo-mic);
-      border-color: var(--rojo-mic);
+    .btn-inline:hover, .btn-inline:active {
+      color: var(--acento-naranja);
+    }
+
+    .btn-inline.recording {
+      color: var(--rojo-mic);
       animation: pulseMic 1s infinite;
     }
 
     @keyframes pulseMic {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(239, 68, 68, 0.4); }
-      50% { transform: scale(1.1); box-shadow: 0 0 15px rgba(239, 68, 68, 0.8); }
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
     }
 
     button.btn-send {
@@ -271,32 +282,31 @@
   </div>
 
   <div id="chat-container">
-    <div class="message bot-message">¡Oído en cocina, pecador! Soy CHEF-88. Puedes hablarme, escribirme o pulsar el botón de la cámara para enseñarme tus ingredientes. ¡Fistro!</div>
+    <div class="message bot-message">¡Oído en cocina, pecador! Soy CHEF-88. Puedes hablarme, escribirme o pulsar la cámara para enseñarme tus ingredientes. ¡Fistro!</div>
   </div>
 
   <div id="input-container">
-    <!-- Entrada oculta para la cámara/galería -->
     <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;" onchange="handleImageSelect(event)">
-    
-    <!-- Botón de Cámara -->
-    <button class="btn-action" onclick="openCamera()" title="Tomar o subir foto">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-        <circle cx="12" cy="13" r="4"></circle>
-      </svg>
-    </button>
 
-    <!-- Botón de Micrófono -->
-    <button id="btn-mic" class="btn-action" onclick="toggleMic()" title="Hablar">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-        <line x1="12" y1="19" x2="12" y2="23"></line>
-        <line x1="8" y1="23" x2="16" y2="23"></line>
-      </svg>
-    </button>
+    <div class="input-wrapper">
+      <input type="text" id="user-input" placeholder="Escribe o habla..." onkeypress="handleKey(event)">
+      
+      <button class="btn-inline" onclick="openCamera()" title="Tomar foto">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+      </button>
 
-    <input type="text" id="user-input" placeholder="Escribe o pulsa el micro..." onkeypress="handleKey(event)">
+      <button id="btn-mic" class="btn-inline" onclick="toggleMic()" title="Hablar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+      </button>
+    </div>
 
     <button class="btn-send" onclick="sendMessage()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -330,7 +340,6 @@
       initSpeechRecognition();
     };
 
-    /* ABRIR CÁMARA O GALERÍA */
     function openCamera() {
       document.getElementById('camera-input').click();
     }
@@ -344,13 +353,12 @@
         selectedImageBase64 = e.target.result.split(',')[1];
         appendImageMessage(e.target.result, 'user-message');
         if (!document.getElementById('user-input').value.trim()) {
-          document.getElementById('user-input').value = "¿Qué puedo cocinar con estos ingredientes, fistro?";
+          document.getElementById('user-input').value = "¿Qué puedo cocinar con esto, fistro?";
         }
       };
       reader.readAsDataURL(file);
     }
 
-    /* INICIALIZAR RECONOCIMIENTO DE VOZ */
     function initSpeechRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SpeechRecognition) {
@@ -451,8 +459,6 @@
       const cleanText = text.replace(/[*_#]/g, '');
       const utterance = new SpeechSynthesisUtterance(cleanText);
       utterance.lang = 'es-ES';
-      
-      // Ajuste de tono y velocidad
       utterance.pitch = 1.25;
       utterance.rate = 1.10;
 
@@ -474,7 +480,6 @@
       }
 
       if (text) appendMessage(text, 'user-message');
-      
       input.value = '';
 
       setChefState('thinking', 'Escaneando ingredientes...');
@@ -493,7 +498,7 @@
             data: selectedImageBase64
           }
         });
-        selectedImageBase64 = null; // Reiniciar imagen
+        selectedImageBase64 = null;
       }
 
       const models = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash'];
