@@ -63,6 +63,7 @@
 
     .btn-icon.active { border-color: var(--acento-naranja); color: var(--acento-naranja); }
 
+    /* TARJETA ROBOT */
     .chef-dashboard {
       background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
       padding: 12px;
@@ -132,6 +133,7 @@
       letter-spacing: 1.5px;
     }
 
+    /* CHAT */
     #chat-container {
       flex: 1;
       overflow-y: auto;
@@ -162,6 +164,7 @@
       display: block;
     }
 
+    /* CONTROLES DE ENTRADA CORREGIDOS */
     #input-container {
       padding: 10px 12px;
       background-color: var(--panel-bg);
@@ -283,11 +286,14 @@
   </div>
 
   <div id="input-container">
+    <!-- Entrada oculta para la cámara/galería -->
     <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;" onchange="handleImageSelect(event)">
 
+    <!-- Campo de texto unificado con iconos dentro -->
     <div class="input-wrapper">
       <input type="text" id="user-input" placeholder="Escribe o habla..." onkeypress="handleKey(event)">
       
+      <!-- Icono Cámara dentro -->
       <button class="btn-inline" onclick="openCamera()" title="Tomar foto">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
@@ -295,6 +301,7 @@
         </svg>
       </button>
 
+      <!-- Icono Micrófono dentro -->
       <button id="btn-mic" class="btn-inline" onclick="toggleMic()" title="Hablar">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
@@ -305,6 +312,7 @@
       </button>
     </div>
 
+    <!-- Botón Enviar bien visible -->
     <button class="btn-send" onclick="sendMessage()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -498,7 +506,7 @@
         selectedImageBase64 = null;
       }
 
-      const models = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
+      const models = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash'];
       let lastError = '';
       let success = false;
 
