@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHEF-88</title>
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkNIRUYtODgiLAogICJzaG9ydF9uYW1lIjogIkNIRUYtODgiLAogICJzdGFydF91cmwiOiAiLi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMxMmExYTIiLAogICJ0aGVtZV9jb2xvciI6ICIxMmExYTIiCn0=">
+    <style>
+        :root {
+            --bg-dark: #121a22;
+            --panel-bg: #1c2733;
+            --accent-orange: #ff6b35;
+            --accent-green: #2ec4b6;
+            --text-light: #e0e6ed;
+            --text-muted: #8a99ad;
+            --border-color: #2e3d4e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        header {
+            background-color: var(--panel-bg);
+            padding: 16px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            color: var(--accent-orange);
+            letter-spacing: 1px;
+        }
+
+        .api-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        #chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 90%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: var(--accent-orange);
+            color: #ffffff;
+            border-bottom-right-radius: 2px;
+        }
+
+        .chef-message {
+            align-self: flex-start;
+            background-color: var(--panel-bg);
+            color: var(--text-light);
+            border-bottom-left-radius: 2px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Tarjeta de Lista de la Compra Gourmet */
+        .shopping-card {
+            margin-top: 10px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px dashed var(--accent-green);
+            border-radius: 8px;
+        }
+
+        .shopping-card h4 {
+            color: var(--accent-green);
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .shopping-card ul {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 10px;
+        }
+
+        .shopping-card li {
+            font-size: 0.85rem;
+            padding: 3px 0;
+            color: var(--text-light);
+        }
+
+        .delivery-btn {
+            width: 100%;
+            background-color: var(--accent-green);
+            color: #121a22;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: opacity 0.2s;
+        }
+
+        .delivery-btn:hover {
+            opacity: 0.9;
+        }
+
+        #input-container {
+            padding: 12px;
+            background-color: var(--panel-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 8px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 12px;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        button.send-btn {
+            background-color: var(--accent-orange);
+            border: none;
+            color: white;
+            padding: 0 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Modal Key */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: var(--panel-bg);
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal input {
+            width: 100%;
+            margin: 12px 0;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 10px;
+            background: var(--accent-orange);
+            border: none;
+            color: white;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>CHEF-88</h1>
+        <button class="api-btn" onclick="openKeyModal()">Clave API</button>
+    </header>
+
+    <div id="chat-container">
+        <div class="message chef-message">
+            Soy CHEF-88, tu asistente culinario. Dime qué quieres cocinar o qué ingredientes tienes. Si te falta algo de calidad gourmet, te prepararé la lista para pedirtelo a casa.
+        </div>
+    </div>
+
+    <div id="input-container">
+        <input type="text" id="user-input" placeholder="Ej: Quiero cenar algo rápido con pollo..." onkeypress="handleKeyPress(event)">
+        <button class="send-btn" onclick="sendMessage()">Enviar</button>
+    </div>
+
+    <div id="key-modal" class="modal">
+        <div class="modal-content">
+            <h3>Introduce tu Gemini API Key</h3>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">Consíguela gratis en aistudio.google.com</p>
+            <input type="text" id="api-key-input" placeholder="AIzaSy...">
+            <button class="modal-btn" onclick="saveApiKey()">Guardar Clave</button>
+        </div>
+    </div>
+
+    <script>
+        let apiKey = localStorage.getItem('chef88_gemini_key') || '';
+
+        window.onload = () => {
+            if (!apiKey) {
+                openKeyModal();
+            }
+        };
+
+        function openKeyModal() {
+            document.getElementById('key-modal').style.display = 'flex';
+            if (apiKey) document.getElementById('api-key-input').value = apiKey;
+        }
+
+        function saveApiKey() {
+            const val = document.getElementById('api-key-input').value.trim();
+            if (val) {
+                apiKey = val;
+                localStorage.setItem('chef88_gemini_key', apiKey);
+                document.getElementById('key-modal').style.display = 'none';
+            }
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            if (!apiKey) {
+                openKeyModal();
+                return;
+            }
+
+            appendMessage(text, 'user-message');
+            input.value = '';
+
+            const loadingId = appendMessage('CHEF-88 está analizando tu petición...', 'chef-message');
+
+            const systemPrompt = `Eres CHEF-88, un asistente virtual culinario con un tono sarcástico e irónico, pero sumamente eficiente y experto en alta cocina. 
+Debes responder SIEMPRE devolviendo un objeto JSON estrictamente formateado con la siguiente estructura:
+{
+  "respuesta": "Tu explicación de la receta con tono sarcástico y divertido paso a paso.",
+  "ingredientes_gourmet": ["Ingrediente premium 1 con cantidad", "Ingrediente premium 2 con cantidad"]
+}
+En "ingredientes_gourmet" debes seleccionar los ingredientes necesarios de la mejor calidad posible (ej. 'Aceite de Oliva Virgen Extra D.O. Jaén', 'Huevos Camperos Pazo de Vilane Class A', etc.) para que el usuario pueda comprarlos a domicilio.`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: `${systemPrompt}\n\nPetición del usuario: "${text}"` }]
+                        }],
+                        generationConfig: {
+                            responseMimeType: "application/json"
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                document.getElementById(loadingId).remove();
+
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
+                    appendChefResponse(parsed.respuesta, parsed.ingredientes_gourmet);
+                } else {
+                    appendMessage('Error: Clave API inválida o límite superado.', 'chef-message');
+                }
+            } catch (err) {
+                document.getElementById(loadingId).remove();
+                appendMessage('Error al conectar con la base de datos culinaria.', 'chef-message');
+            }
+        }
+
+        function appendMessage(text, className) {
+            const container = document.getElementById('chat-container');
+            const div = document.createElement('div');
+            const id = 'msg-' + Date.now();
+            div.id = id;
+            div.className = `message ${className}`;
+            div.innerText = text;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            return id;
+        }
+
+        function appendChefResponse(respuesta, ingredientes) {
+            const container = document.getElementById('chat-container');
+            const div = document.createElement('div');
+            div.className = 'message chef-message';
+
+            let contentHtml = `<div>${respuesta}</div>`;
+
+            if (ingredientes && ingredientes.length > 0) {
+                const queryCart = encodeURIComponent(ingredientes.join(', '));
+                contentHtml += `
+                    <div class="shopping-card">
+                        <h4>🛒 Lista Gourmet sugerida para casa</h4>
+                        <ul>
+                            ${ingredientes.map(item => `<li>• ${item}</li>`).join('')}
+                        </ul>
+                        <button class="delivery-btn" onclick="orderHome('${queryCart}')">
+                            🚀 Pedir estos ingredientes a domicilio
+                        </button>
+                    </div>
+                `;
+            }
+
+            div.innerHTML = contentHtml;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function orderHome(query) {
+            const url = `https://www.google.com/search?q=comprar+online+supermercado+${query}`;
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>
