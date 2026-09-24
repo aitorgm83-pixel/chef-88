@@ -30,7 +30,7 @@
       overflow: hidden;
     }
 
-    /* HEADER SUPERIOR CON CONTROLES */
+    /* HEADER SUPERIOR */
     header {
       background-color: rgba(30, 41, 59, 0.8);
       backdrop-filter: blur(10px);
@@ -49,21 +49,30 @@
       letter-spacing: 1px;
     }
 
-    .btn-api {
+    .header-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-icon {
       background: var(--panel-secundario);
       border: 1px solid var(--color-borde);
       color: var(--texto-ligero);
       padding: 6px 12px;
       border-radius: 20px;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
       transition: all 0.2s;
     }
 
-    .btn-api:active { transform: scale(0.95); }
+    .btn-icon:active { transform: scale(0.95); }
+    .btn-icon.active { border-color: var(--acento-naranja); color: var(--acento-naranja); }
 
-    /* TARJETA CENTRAL DE CHEF-88 (EL ROBOT) */
+    /* TARJETA CENTRAL DEL ROBOT CHEF */
     .chef-dashboard {
       background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
       padding: 16px;
@@ -84,7 +93,6 @@
       justify-content: center;
     }
 
-    /* Halo de luz tras el robot */
     .robot-glow {
       position: absolute;
       width: 80px;
@@ -103,7 +111,6 @@
       transition: transform 0.3s ease;
     }
 
-    /* Animación Flotante */
     @keyframes idleFloat {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
       50% { transform: translateY(-6px) rotate(1deg); }
@@ -113,7 +120,6 @@
       animation: idleFloat 3.5s ease-in-out infinite;
     }
 
-    /* Animación Pensando / Cocinando */
     @keyframes thinkingBounce {
       0%, 100% { transform: scale(1) translateY(0); }
       50% { transform: scale(1.08) translateY(-4px); }
@@ -129,7 +135,15 @@
       background: #f59e0b;
     }
 
-    /* Estado de la antena */
+    @keyframes speakingPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .robot-container.speaking {
+      animation: speakingPulse 0.4s ease-in-out infinite;
+    }
+
     .antenna-light {
       fill: var(--acento-naranja);
       transition: fill 0.3s ease;
@@ -145,17 +159,14 @@
       to { opacity: 1; }
     }
 
-    /* Ojos del Robot */
     .eye {
       fill: var(--verde-neon);
       transition: all 0.3s ease;
     }
 
-    .thinking .eye {
-      fill: #f59e0b;
-    }
+    .thinking .eye { fill: #f59e0b; }
+    .speaking .eye { fill: var(--acento-naranja); }
 
-    /* Boca / Ondas de estado */
     .chef-status-text {
       margin-top: 8px;
       font-size: 0.8rem;
@@ -278,7 +289,10 @@
 
   <header>
     <div class="app-title">CHEF-88 AI</div>
-    <button class="btn-api" onclick="openModal()">🔑 Clave API</button>
+    <div class="header-controls">
+      <button id="btn-audio" class="btn-icon active" onclick="toggleAudio()">🔊 Voz</button>
+      <button class="btn-icon" onclick="openModal()">🔑 API</button>
+    </div>
   </header>
 
   <!-- PANEL CENTRAL DEL ROBOT CHEF -->
@@ -314,17 +328,17 @@
       </div>
       <div class="robot-glow"></div>
     </div>
-    <div id="chef-status" class="chef-status-text">Listo para cocinar</div>
+    <div id="chef-status" class="chef-status-text">¡Al ataqueer!</div>
   </div>
 
   <!-- CONTENEDOR DEL CHAT -->
   <div id="chat-container">
-    <div class="message bot-message">¡Oído en cocina! Soy CHEF-88. Dime qué ingredientes tienes a mano o qué se te antoja comer hoy y te preparo la receta ideal.</div>
+    <div class="message bot-message">¡Oído en cocina, pecador! Soy CHEF-88. Dime qué tienes en la nevera y te preparo un plato de categoría. ¡Fistro!</div>
   </div>
 
   <!-- ENTRADA DE TEXTO -->
   <div id="input-container">
-    <input type="text" id="user-input" placeholder="Ej: Tengo huevos, patatas y cebolla..." onkeypress="handleKey(event)">
+    <input type="text" id="user-input" placeholder="Ej: Tengo patatas y huevos..." onkeypress="handleKey(event)">
     <button class="btn-send" onclick="sendMessage()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -340,18 +354,32 @@
       <p style="font-size:0.85rem; color: var(--texto-silenciado);">Ingresa tu API Key de Google AI Studio:</p>
       <input type="text" id="api-key-input" placeholder="AQ.Ab8RN...">
       <div class="modal-actions">
-        <button class="btn-api" onclick="closeModal()">Cancelar</button>
-        <button class="btn-api" style="background: var(--acento-naranja);" onclick="saveApiKey()">Guardar</button>
+        <button class="btn-icon" onclick="closeModal()">Cancelar</button>
+        <button class="btn-icon" style="background: var(--acento-naranja);" onclick="saveApiKey()">Guardar</button>
       </div>
     </div>
   </div>
 
   <script>
     let apiKey = localStorage.getItem('CHEF88_API_KEY') || '';
+    let audioEnabled = true;
 
     window.onload = () => {
       if (!apiKey) openModal();
     };
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('btn-audio');
+      if (audioEnabled) {
+        btn.innerText = '🔊 Voz';
+        btn.classList.add('active');
+      } else {
+        btn.innerText = '🔇 Voz';
+        btn.classList.remove('active');
+        window.speechSynthesis.cancel();
+      }
+    }
 
     function openModal() {
       document.getElementById('api-key-input').value = apiKey;
@@ -384,10 +412,38 @@
       status.innerText = text;
 
       if (state === 'thinking') {
-        mouth.setAttribute('d', 'M44 73 L56 73'); // Boca neutra/procesando
+        mouth.setAttribute('d', 'M44 73 L56 73');
+      } else if (state === 'speaking') {
+        mouth.setAttribute('d', 'M42 70 Q50 78 58 70');
       } else {
-        mouth.setAttribute('d', 'M42 72 Q50 76 58 72'); // Sonrisa alegre
+        mouth.setAttribute('d', 'M42 72 Q50 76 58 72');
       }
+    }
+
+    function speakText(text) {
+      if (!audioEnabled || !('speechSynthesis' in window)) return;
+
+      window.speechSynthesis.cancel(); // Cancelar cualquier audio anterior
+
+      const cleanText = text.replace(/[*_#]/g, ''); // Limpiar caracteres de formato
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = 'es-ES';
+      utterance.pitch = 1.35; // Tono más agudo para emular estilo Chiquito
+      utterance.rate = 1.15;  // Velocidad más rápida y atropellada
+
+      utterance.onstart = () => {
+        setChefState('speaking', '¡Hablando, pecador!');
+      };
+
+      utterance.onend = () => {
+        setChefState('idle', '¡Al ataqueer!');
+      };
+
+      utterance.onerror = () => {
+        setChefState('idle', '¡Al ataqueer!');
+      };
+
+      window.speechSynthesis.speak(utterance);
     }
 
     async function sendMessage() {
@@ -407,32 +463,46 @@
       const loadingId = appendMessage('CHEF-88 está pensando...', 'bot-message');
       const loadingElem = document.getElementById(loadingId);
 
-      try {
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey
-          },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{ text: "Eres CHEF-88, un chef experto con toque sarcástico pero muy servicial. " + text }]
-            }]
-          })
-        });
+      const promptSystem = "Eres CHEF-88, un chef robot experto y cómico que habla exactamente con el estilo, ritmo y muletillas de Chiquito de la Calzada. Usa expresiones como '¡Fistro!', '¡Pekador de la pradera!', '¡Jarl!', '¡Siete caballos vienen de Bonanza!', '¡No te digo trigo por no llamarte Rodrigo!'. Da respuestas culinarias útiles y recetas breves pero cargadas de su humor. ";
 
-        const data = await response.json();
+      const models = ['gemini-3.6-flash', 'gemini-1.5-flash', 'gemini-2.0-flash'];
+      let lastError = '';
+      let success = false;
 
-        if (response.ok && data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
-          loadingElem.innerText = data.candidates[0].content.parts[0].text;
-        } else {
-          const detail = data.error?.message || response.statusText || 'Error de conexión';
-          loadingElem.innerText = `[Error]: ${detail}`;
+      for (const model of models) {
+        try {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-goog-api-key': apiKey
+            },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{ text: promptSystem + text }]
+              }]
+            })
+          });
+
+          const data = await response.json();
+
+          if (response.ok && data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+            const answer = data.candidates[0].content.parts[0].text;
+            loadingElem.innerText = answer;
+            speakText(answer); // Leer respuesta con voz
+            success = true;
+            break;
+          } else {
+            lastError = data.error?.message || response.statusText;
+          }
+        } catch (err) {
+          lastError = err.message;
         }
-      } catch (err) {
-        loadingElem.innerText = 'Error de red o conexión: ' + err.message;
-      } finally {
-        setChefState('idle', 'Listo para cocinar');
+      }
+
+      if (!success) {
+        loadingElem.innerText = `[Error]: Servidores ocupados. (${lastError})`;
+        setChefState('idle', '¡Al ataqueer!');
       }
     }
 
